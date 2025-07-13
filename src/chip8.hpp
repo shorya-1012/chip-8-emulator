@@ -30,7 +30,7 @@ class Chip8 {
   uint8_t memory[MEMEORY_SIZE];
   uint16_t stack[STACK_SIZE];
   uint8_t framebuffer[FRAMERBUFFER_ROWS][FRAMERBUFFER_COLS];
-  uint8_t keys[KEYS];
+  bool keys[KEYS];
 
   void advance_program_counter();
 

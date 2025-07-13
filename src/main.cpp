@@ -33,9 +33,7 @@ int main(int argc, char *argv[]) {
   // Todo : Load rom
 
   while (is_running) {
-
-    // Todo : CPU cycle
-    // cpu.cycle();
+    cpu.cycle();
 
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
