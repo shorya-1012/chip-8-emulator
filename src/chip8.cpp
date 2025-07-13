@@ -1,5 +1,10 @@
 #include "chip8.hpp"
+#include <SDL3/SDL_log.h>
+#include <SDL3/SDL_stdinc.h>
 #include <cstdint>
+#include <cstdlib>
+#include <fstream>
+#include <ios>
 #include <random>
 #include <strings.h>
 #include <utility>
@@ -10,7 +15,7 @@ std::mt19937 generator(random_dev());
 std::uniform_int_distribution<> distribution(0, 255);
 
 Chip8::Chip8() {
-  program_counter = 0x200;
+  program_counter = PROGRAM_COUNTER_OFFSET;
   stack_ptr = 0;
   delay_timer = 0;
   sound_timer = 0;
@@ -46,6 +51,8 @@ Chip8::Chip8() {
 }
 
 inline void Chip8::advance_program_counter() { program_counter += 2; }
+
+inline void Chip8::debug_instruction() { SDL_Log("%X", opcode); }
 
 inline std::pair<uint8_t, uint8_t> get_registers(uint16_t arguments) {
   uint8_t x = arguments >> 8;
@@ -166,7 +173,7 @@ void Chip8::cycle() {
   }
   case 0x9: {
     auto [x, y] = get_registers(arguments);
-    if (registers[x] == registers[y]) {
+    if (registers[x] != registers[y]) {
       advance_program_counter();
     }
     break;
@@ -194,7 +201,7 @@ void Chip8::cycle() {
       uint8_t sprite_byte = memory[index + y];
       for (uint8_t x = 0; x < 8; x++) {
         // start drawing from most sig. bit
-        uint8_t sprite_pixel = (sprite_byte >> (7 - y)) & 1;
+        uint8_t sprite_pixel = (sprite_byte >> (7 - x)) & 1;
 
         uint8_t screen_x = (x_register + x) % FRAMERBUFFER_COLS;
         uint8_t screen_y = (y_register + y) % FRAMERBUFFER_ROWS;
@@ -278,8 +285,8 @@ void Chip8::cycle() {
     }
     case 0x65: {
       uint8_t curr_register = 0;
-      for (uint16_t i = index; i <= x; i++) {
-        registers[curr_register++] = memory[i];
+      for (uint16_t i = 0; i <= x; i++) {
+        registers[curr_register++] = memory[index + i];
       }
       break;
     }
@@ -287,4 +294,27 @@ void Chip8::cycle() {
   }
   }
   advance_program_counter();
+  if (delay_timer > 0)
+    delay_timer--;
+  if (sound_timer > 0)
+    // Todo : Play some sound
+    sound_timer--;
+}
+
+void Chip8::load_rom(const char *filename) {
+  std::ifstream infile(filename, std::ios::binary | std::ios::ate);
+  if (!infile) {
+    SDL_Log("%s", "Unable to load rom\n");
+    exit(EXIT_FAILURE);
+  }
+
+  uint32_t size = infile.tellg();
+  infile.seekg(0, std::ios::beg);
+
+  if (PROGRAM_COUNTER_OFFSET + size > MEMEORY_SIZE) {
+    SDL_Log("%s", "Rom Too Large\n");
+    exit(EXIT_FAILURE);
+  }
+
+  infile.read(reinterpret_cast<char *>(&memory[PROGRAM_COUNTER_OFFSET]), size);
 }

@@ -18,6 +18,7 @@ constexpr uint8_t REGISTERS = 16;
 constexpr uint8_t KEYS = 16;
 constexpr uint8_t FRAMERBUFFER_ROWS = 32;
 constexpr uint8_t FRAMERBUFFER_COLS = 64;
+constexpr uint16_t PROGRAM_COUNTER_OFFSET = 0x200;
 
 class Chip8 {
   uint8_t stack_ptr;
@@ -37,4 +38,6 @@ class Chip8 {
 public:
   Chip8();
   void cycle();
+  void debug_instruction();
+  void load_rom(const char *filename);
 };

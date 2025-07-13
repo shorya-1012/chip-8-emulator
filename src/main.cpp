@@ -25,14 +25,23 @@ void init_graphics() {
 }
 
 int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    SDL_Log("%s", "No rom provided\n");
+    exit(EXIT_FAILURE);
+  }
+
+  const char *rom_file = argv[1];
+
   init_graphics();
   bool is_running = true;
   SDL_Event event;
 
   Chip8 cpu;
-  // Todo : Load rom
+  cpu.load_rom(rom_file);
 
   while (is_running) {
+    cpu.debug_instruction();
+
     cpu.cycle();
 
     while (SDL_PollEvent(&event)) {
