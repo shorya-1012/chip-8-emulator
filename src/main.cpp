@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <thread>
 
 constexpr int SCREEN_HEIGHT = 480;
