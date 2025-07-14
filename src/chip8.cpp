@@ -52,7 +52,11 @@ Chip8::Chip8() {
 
 inline void Chip8::advance_program_counter() { program_counter += 2; }
 
-inline void Chip8::debug_instruction() { SDL_Log("%X", opcode); }
+void Chip8::set_key_status(uint8_t key, bool is_pressed) {
+  keys[key] = is_pressed;
+}
+
+void Chip8::debug_instruction() { SDL_Log("%X", opcode); }
 
 inline std::pair<uint8_t, uint8_t> get_registers(uint16_t arguments) {
   uint8_t x = arguments >> 8;
@@ -193,9 +197,9 @@ void Chip8::cycle() {
     break;
   }
   case 0xD: {
-    auto [x, y] = get_registers(arguments);
-    uint8_t x_register = registers[x];
-    uint8_t y_register = registers[y];
+    auto [vx, vy] = get_registers(arguments);
+    uint8_t x_register = registers[vx];
+    uint8_t y_register = registers[vy];
     uint8_t n = opcode & 0x000F;
     for (uint8_t y = 0; y < n; y++) {
       uint8_t sprite_byte = memory[index + y];
@@ -207,8 +211,8 @@ void Chip8::cycle() {
         uint8_t screen_y = (y_register + y) % FRAMERBUFFER_ROWS;
 
         if (sprite_pixel) {
-          framebuffer[y][x] ^= 1;
-          if (framebuffer[y][x] == 0) {
+          framebuffer[screen_y][screen_x] ^= 1;
+          if (framebuffer[screen_y][screen_x] == 0) {
             registers[15] = 1;
           }
         }

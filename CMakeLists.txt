@@ -10,6 +10,7 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 add_executable(${PROJECT_NAME} 
   ${SOURCE_DIR}/main.cpp
+  ${SOURCE_DIR}/chip8.cpp
 )
 
 add_subdirectory(vendor)
