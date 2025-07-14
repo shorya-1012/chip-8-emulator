@@ -1,13 +1,9 @@
 #include "chip8.hpp"
 #include <SDL3/SDL_log.h>
-#include <SDL3/SDL_stdinc.h>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
-#include <ios>
 #include <random>
-#include <strings.h>
-#include <utility>
 
 // setup random generator
 std::random_device random_dev;
@@ -70,6 +66,8 @@ void Chip8::cycle() {
   uint8_t first_nibble = opcode >> 12;
   uint16_t arguments = opcode & 0x0FFF;
 
+  bool adavnced = false;
+
   switch (first_nibble) {
   case 0x0:
     switch (opcode) {
@@ -82,15 +80,18 @@ void Chip8::cycle() {
       break;
     case 0x00EE:
       program_counter = stack[--stack_ptr];
+      adavnced = true;
       break;
     }
     break;
   case 0x1:
     program_counter = arguments;
+    adavnced = true;
     break;
   case 0x2:
-    stack[stack_ptr++] = program_counter;
+    stack[stack_ptr++] = program_counter + 2;
     program_counter = arguments;
+    adavnced = true;
     break;
   case 0x3: {
     uint16_t kk = arguments & 0x00FF;
@@ -188,6 +189,7 @@ void Chip8::cycle() {
   }
   case 0xB: {
     program_counter = arguments + registers[0];
+    adavnced = true;
     break;
   }
   case 0xC: {
@@ -232,6 +234,7 @@ void Chip8::cycle() {
     case 0xA1: {
       if (keys[registers[x]] == false) {
         advance_program_counter();
+        adavnced = true;
       }
       break;
     }
@@ -281,10 +284,11 @@ void Chip8::cycle() {
       break;
     }
     case 0x55: {
-      uint8_t i = index;
-      for (uint8_t curr_register = 0; curr_register <= x; curr_register++) {
-        memory[i++] = registers[curr_register];
+      uint8_t current_register = 0;
+      for (uint8_t i = 0; i <= x; i++) {
+        memory[index + i] = registers[current_register++];
       }
+      index = index + x + 1;
       break;
     }
     case 0x65: {
@@ -292,17 +296,20 @@ void Chip8::cycle() {
       for (uint16_t i = 0; i <= x; i++) {
         registers[curr_register++] = memory[index + i];
       }
+      index = index + x + 1;
       break;
     }
     }
   }
   }
-  advance_program_counter();
+  if (!adavnced)
+    advance_program_counter();
   if (delay_timer > 0)
     delay_timer--;
   if (sound_timer > 0)
-    // Todo : Play some sound
-    sound_timer--;
+    adavnced = true;
+  // Todo : Play some sound
+  sound_timer--;
 }
 
 void Chip8::load_rom(const char *filename) {

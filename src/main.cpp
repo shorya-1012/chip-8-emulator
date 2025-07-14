@@ -7,8 +7,8 @@
 #include <cstring>
 #include <thread>
 
-constexpr int SCREEN_HEIGHT = 480;
-constexpr int SCREEN_WIDTH = 960;
+constexpr int SCREEN_HEIGHT = 720;
+constexpr int SCREEN_WIDTH = 1200;
 
 static SDL_Window *window = nullptr;
 static SDL_Renderer *renderer = nullptr;
@@ -102,9 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
     SDL_UnlockTexture(texture);
-    SDL_FRect dst_rect = {0, 0, static_cast<float>(SCREEN_WIDTH),
-                          static_cast<float>(SCREEN_HEIGHT)};
-    SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
+    SDL_RenderTexture(renderer, texture, NULL, NULL);
 
     SDL_RenderPresent(renderer);
 
