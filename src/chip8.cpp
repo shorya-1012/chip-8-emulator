@@ -53,7 +53,6 @@ void Chip8::set_key_status(uint8_t key, bool is_pressed) {
 }
 
 void Chip8::debug_instruction() { SDL_Log("%X", opcode); }
-
 inline std::pair<uint8_t, uint8_t> get_registers(uint16_t arguments) {
   uint8_t x = arguments >> 8;
   uint8_t y = (arguments & 0x00FF) >> 4;
