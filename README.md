@@ -2,6 +2,8 @@
 
 This repository contains my implementation of a CHIP-8 emulator written in C++. It's a simple virtual machine capable of running classic CHIP-8 programs.
 
+![Demo](./output/output.gif)
+
 ### Dependencies
 
 * **SDL3**
